@@ -1,11 +1,13 @@
 use master;
-DROP DATABASE BloodTransfusion;
+GO
 
-IF NOT EXISTS 
-   (
-     SELECT name FROM master.dbo.sysdatabases 
-     WHERE name = N'BloodTransfusion'
-    )
+IF DB_ID('BloodTransfusion')>0
+BEGIN
+	ALTER DATABASE BloodTransfusion SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+	DROP DATABASE BloodTransfusion
+END
+GO
+
 CREATE DATABASE [BloodTransfusion]
 GO
 
@@ -70,6 +72,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
         donorId INTEGER NOT NULL,
         happendAt INTEGER NOT NULL,
         amount INTEGER NOT NULL,
+        donationTime DATETIME NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
         FOREIGN KEY (donorId) REFERENCES BloodTransporter(id),
@@ -107,4 +110,27 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
         FOREIGN KEY (neededBy) REFERENCES Donation(id),
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
     )
+GO
+
+-- TEMP inserted datas
+INSERT INTO BloodTransporter (id, firstName, lastName, bloodType)
+                VALUES      (1, N'saeed', N'saeed', N'A+'),
+                            (2, N'ali', N'ali', N'B+'),
+                            (3, N'ahmad', N'ahmad', N'AB+'),
+                            (4, N'asghar', N'asghar', N'A-'),
+                            (5, N'akbar', N'akbar', N'A+');
+GO
+
+-- TEMP inserted datas
+INSERT INTO BloodBank (id, bankAddress, bankName)
+                VALUES      (1, N'bank1', N'bank1');
+GO
+
+-- TEMP inserted datas
+INSERT INTO Donation (id, donorId, happendAt, amount, donationTime)
+                VALUES      (1, 1, 1, 100, '2015-01-01 21:12:35'),
+                            (2, 1, 1, 100, '2015-02-02 21:12:35'),
+                            (3, 3, 1, 100, '2015-01-03 21:12:35'),
+                            (4, 3, 1, 100, '2015-01-04 21:12:35'),
+                            (5, 3, 1, 100, '2015-01-05 21:12:35');
 GO
