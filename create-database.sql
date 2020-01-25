@@ -11,8 +11,6 @@ GO
 
 use BloodTransfusion;
 
--- DROP TABLE BloodTransporter;
-
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodTransporter' and xtype='U')
 CREATE TABLE BloodTransporter (
     id INTEGER PRIMARY KEY,
@@ -59,13 +57,54 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
         density INTEGER NOT NULL,
         testTime DATETIME NOT NULL,
         happendAt INTEGER NOT NULL,
+        bloodTransporterId INTEGER NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
+        FOREIGN KEY (bloodTransporterId) REFERENCES BloodTransporter(id),
     )
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
     CREATE TABLE Donation (
         id INTEGER NOT NULL,
+        donorId INTEGER NOT NULL,
+        happendAt INTEGER NOT NULL,
+        amount INTEGER NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
+        FOREIGN KEY (donorId) REFERENCES BloodTransporter(id),
+    )
+GO
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodProduct' and xtype='U')
+    CREATE TABLE BloodProduct (
+        productName NVARCHAR(64) NOT NULL,
+        PRIMARY KEY (productName),
+    )
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
+    CREATE TABLE BloodPacket (
+        id INTEGER NOT NULL,
+        donationId INTEGER NOT NULL,
+        bloodProduct NVARCHAR(64) NOT NULL,
+        expirationDate SMALLDATETIME NOT NULL,
+        signedBy INTEGER NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (donationId) REFERENCES Donation(id),
+        FOREIGN KEY (signedBy) REFERENCES Nurse(employeeId),
+        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName),
+    )
+GO
+
+-- A trigger on Needs to delete and archive the need after amount set to 0
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
+    CREATE TABLE Need (
+        neededBy INTEGER NOT NULL,
+        amount INTEGER NOT NULL,
+        bloodProduct NVARCHAR(64) NOT NULL,
+        needPriority INTEGER NOT NULL DEFAULT 1 CHECK (needPriority >= 1 AND needPriority <= 3),
+        PRIMARY KEY (neededBy, bloodProduct),
+        FOREIGN KEY (neededBy) REFERENCES Donation(id),
+        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
     )
 GO
