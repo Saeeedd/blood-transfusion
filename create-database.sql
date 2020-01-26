@@ -101,17 +101,15 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
     )
 GO
 
--- -- Geolocation data for location
--- IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hospital' and xtype='U')
---     CREATE TABLE Hospital (
---         id INTEGER IDENTITY,
---         hospitalName INTEGER NOT NULL,
---         hospitalAddress NVARCHAR(300)
---         PRIMARY KEY (id),
---         FOREIGN KEY (neededBy) REFERENCES Donation(id),
---         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
---     )
--- GO
+-- TODO Geolocation data for location
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hospital' and xtype='U')
+    CREATE TABLE Hospital (
+        id INTEGER IDENTITY,
+        hospitalName NVARCHAR(60) NOT NULL,
+        hospitalAddress NVARCHAR(300) UNIQUE NOT NULL,
+        PRIMARY KEY (id),
+    )
+GO
 
 -- A trigger on Needs to delete and archive the need after amount set to 0
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
@@ -121,7 +119,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
         bloodProduct NVARCHAR(64) NOT NULL,
         needPriority INTEGER NOT NULL DEFAULT 1 CHECK (needPriority >= 1 AND needPriority <= 3),
         PRIMARY KEY (neededBy, bloodProduct),
-        FOREIGN KEY (neededBy) REFERENCES Donation(id),
+        FOREIGN KEY (neededBy) REFERENCES Hospital(id),
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
     )
 GO
@@ -156,6 +154,13 @@ INSERT INTO Nurse (firstName, lastName, hiringDate)
                             (N'nurse3', N'nurse3', '2015-01-03 21:12:35'),
                             (N'nurse4', N'nurse4', '2015-01-04 21:12:35'),
                             (N'nurse5', N'nurse5', '2015-01-05 21:12:35');
+GO
+
+-- TEMP inserted datas
+INSERT INTO Hospital (hospitalName, hospitalAddress)
+                VALUES      (N'Hospital1', N'address1'),
+                            (N'Hospital2', N'address2'),
+                            (N'Hospital3', N'address3');
 GO
 
 -- TEMP inserted datas
