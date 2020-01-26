@@ -11,11 +11,12 @@ BEGIN
     SET NOCOUNT ON;
     SELECT * FROM BloodTransporter transporters
         WHERE (
-            (SELECT COUNT(*) FROM Donation WHERE donorId = transporters.id) > 0
+            (SELECT COUNT(*) FROM Donation WHERE donorId = transporters.nationalId) > 0
         );
     RETURN
 END
 Go
+
 
 EXEC GetListOfDonors;
 GO
@@ -25,7 +26,7 @@ GO
 
 -- Get the time for next donation
 CREATE PROCEDURE GetTimeOfNextDonation
-    @blood_transporter_id [INTEGER],
+    @blood_transporter_id NVARCHAR(10),
     @date_value DATETIME OUTPUT
 AS 
 BEGIN
@@ -37,7 +38,7 @@ END
 Go 
 
 declare @date DATETIME;
-exec GetTimeOfNextDonation 1, @date OUTPUT;
+exec GetTimeOfNextDonation N'0021190941', @date OUTPUT;
 SELECT @date as nextDonationTime
 GO
 
@@ -56,7 +57,7 @@ BEGIN
     FROM BloodPacket blood_packet, Donation donation , BloodTransporter blood_transporter 
     WHERE (
         blood_packet.donationId = donation.id AND 
-        donation.donorId = blood_transporter.id AND
+        donation.donorId = blood_transporter.nationalId AND
         blood_transporter.bloodType = @blood_type AND
         blood_packet.bloodProduct = @blood_product
     ) ORDER BY blood_packet.expirationDate ASC

@@ -15,7 +15,7 @@ use BloodTransfusion;
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodTransporter' and xtype='U')
 CREATE TABLE BloodTransporter (
-    id INTEGER IDENTITY PRIMARY KEY,
+    nationalId NVARCHAR(10) PRIMARY KEY CHECK (nationalId LIKE '%[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]%'),
     firstName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
     lastName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
     bloodType NVARCHAR(10) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-'))
@@ -59,23 +59,23 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
         density INTEGER NOT NULL,
         testTime DATETIME NOT NULL,
         happendAt INTEGER NOT NULL,
-        bloodTransporterId INTEGER NOT NULL,
+        bloodTransporterNationalId NVARCHAR(10) NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
-        FOREIGN KEY (bloodTransporterId) REFERENCES BloodTransporter(id),
+        FOREIGN KEY (bloodTransporterNationalId) REFERENCES BloodTransporter(nationalId),
     )
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
     CREATE TABLE Donation (
         id INTEGER NOT NULL IDENTITY,
-        donorId INTEGER NOT NULL,
+        donorId NVARCHAR(10) NOT NULL,
         happendAt INTEGER NOT NULL,
         amount INTEGER NOT NULL,
         donationTime DATETIME NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
-        FOREIGN KEY (donorId) REFERENCES BloodTransporter(id),
+        FOREIGN KEY (donorId) REFERENCES BloodTransporter(nationalId),
     )
 GO
 
@@ -114,12 +114,12 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
 GO
 
 -- TEMP inserted datas
-INSERT INTO BloodTransporter (firstName, lastName, bloodType)
-                VALUES      (N'saeed', N'saeed', N'A+'),
-                            (N'ali', N'ali', N'B+'),
-                            (N'ahmad', N'ahmad', N'AB+'),
-                            (N'asghar', N'asghar', N'A-'),
-                            (N'akbar', N'akbar', N'A+');
+INSERT INTO BloodTransporter (nationalId, firstName, lastName, bloodType)
+                VALUES      (N'0021190941', N'saeed', N'saeed', N'A+'),
+                            (N'0021190942', N'ali', N'ali', N'B+'),
+                            (N'0021190943', N'ahmad', N'ahmad', N'AB+'),
+                            (N'0021190944', N'asghar', N'asghar', N'A-'),
+                            (N'0021190945', N'akbar', N'akbar', N'A+');
 GO
 
 -- TEMP inserted datas
@@ -129,11 +129,11 @@ GO
 
 -- TEMP inserted datas
 INSERT INTO Donation (donorId, happendAt, amount, donationTime)
-                VALUES      (1, 1, 100, '2015-01-01 21:12:35'),
-                            (1, 1, 100, '2015-02-02 21:12:35'),
-                            (3, 1, 100, '2015-01-03 21:12:35'),
-                            (3, 1, 100, '2015-01-04 21:12:35'),
-                            (3, 1, 100, '2015-01-05 21:12:35');
+                VALUES      (N'0021190941', 1, 100, '2015-01-01 21:12:35'),
+                            (N'0021190941', 1, 100, '2015-02-02 21:12:35'),
+                            (N'0021190943', 1, 100, '2015-01-03 21:12:35'),
+                            (N'0021190943', 1, 100, '2015-01-04 21:12:35'),
+                            (N'0021190943', 1, 100, '2015-01-05 21:12:35');
 GO
 
 -- TEMP inserted datas
