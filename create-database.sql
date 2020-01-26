@@ -18,7 +18,8 @@ CREATE TABLE BloodTransporter (
     nationalId NVARCHAR(10) PRIMARY KEY CHECK (nationalId LIKE '%[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]%'),
     firstName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
     lastName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
-    bloodType NVARCHAR(10) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-'))
+    bloodType NVARCHAR(10) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')),
+    email NVARCHAR(100)
 )
 GO
 
@@ -34,7 +35,7 @@ GO
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodBank' and xtype='U')
     CREATE TABLE BloodBank (
         id INTEGER PRIMARY KEY IDENTITY,
-        bankAddress NVARCHAR(200) COLLATE PERSIAN_100_CI_AI NOT NULL,
+        bankAddress NVARCHAR(300) COLLATE PERSIAN_100_CI_AI NOT NULL,
         bankName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
     )
 GO
@@ -82,6 +83,7 @@ GO
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodProduct' and xtype='U')
     CREATE TABLE BloodProduct (
         productName NVARCHAR(64) NOT NULL,
+        volumePerUnit SMALLINT NOT NULL,
         PRIMARY KEY (productName),
     )
 
@@ -90,7 +92,6 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
         id INTEGER NOT NULL IDENTITY,
         donationId INTEGER NOT NULL,
         bloodProduct NVARCHAR(64) NOT NULL,
-        amount  INTEGER NOT NULL CHECK (amount > 0),
         expirationDate SMALLDATETIME NOT NULL,
         signedBy INTEGER NOT NULL,
         PRIMARY KEY (id),
@@ -100,11 +101,23 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
     )
 GO
 
+-- -- Geolocation data for location
+-- IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hospital' and xtype='U')
+--     CREATE TABLE Hospital (
+--         id INTEGER IDENTITY,
+--         hospitalName INTEGER NOT NULL,
+--         hospitalAddress NVARCHAR(300)
+--         PRIMARY KEY (id),
+--         FOREIGN KEY (neededBy) REFERENCES Donation(id),
+--         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
+--     )
+-- GO
+
 -- A trigger on Needs to delete and archive the need after amount set to 0
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
     CREATE TABLE Need (
         neededBy INTEGER NOT NULL,
-        amount INTEGER NOT NULL,
+        units INTEGER NOT NULL,
         bloodProduct NVARCHAR(64) NOT NULL,
         needPriority INTEGER NOT NULL DEFAULT 1 CHECK (needPriority >= 1 AND needPriority <= 3),
         PRIMARY KEY (neededBy, bloodProduct),
@@ -146,15 +159,15 @@ INSERT INTO Nurse (firstName, lastName, hiringDate)
 GO
 
 -- TEMP inserted datas
-INSERT INTO BloodProduct (productName)
-                VALUES      (N'Plasma');
+INSERT INTO BloodProduct (productName, volumePerUnit)
+                VALUES      (N'Plasma', 200);
 GO
 
 -- TEMP inserted datas
-INSERT INTO BloodPacket (donationId, bloodProduct, amount, expirationDate, signedBy)
-                VALUES      (1, N'Plasma', 500, '2015-01-01 21:12:35', 1),
-                            (1, N'Plasma', 500, '2015-02-02 21:12:35', 2),
-                            (1, N'Plasma', 500, '2015-01-03 21:12:35', 3),
-                            (1, N'Plasma', 500, '2015-01-04 21:12:35', 4),
-                            (2, N'Plasma', 500, '2015-01-05 21:12:35', 5);
+INSERT INTO BloodPacket (donationId, bloodProduct, expirationDate, signedBy)
+                VALUES      (1, N'Plasma', '2015-01-01 21:12:35', 1),
+                            (1, N'Plasma', '2015-02-02 21:12:35', 2),
+                            (1, N'Plasma', '2015-01-03 21:12:35', 3),
+                            (1, N'Plasma', '2015-01-04 21:12:35', 4),
+                            (2, N'Plasma', '2015-01-05 21:12:35', 5);
 GO
