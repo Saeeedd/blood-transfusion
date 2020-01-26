@@ -17,3 +17,10 @@ BEGIN
         VALUES (@firstName, @lastName, @bloodType)
 END
 Go
+
+-- Get all blood tranporters
+SELECT * FROM BloodTransporter;
+GO
+
+-- Get specific blood transporter by id
+SELECT * FROM BloodTransporter WHERE nationalId = N'0021190941';
