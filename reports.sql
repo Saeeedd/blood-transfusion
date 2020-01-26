@@ -38,4 +38,29 @@ Go
 
 declare @date DATETIME;
 exec GetTimeOfNextDonation 1, @date OUTPUT;
-SELECT @date as nextDonationTime;
+SELECT @date as nextDonationTime
+GO
+
+DROP PROCEDURE IF EXISTS GetClosestToExpirationBloodPacket
+GO
+
+-- Get closest to expiration blood packet for next donation
+CREATE PROCEDURE GetClosestToExpirationBloodPacket
+    @blood_type NVARCHAR(64),
+    @blood_product NVARCHAR(64),
+    @num_of_results INTEGER
+AS 
+BEGIN
+    SET NOCOUNT ON;
+    SELECT TOP (@num_of_results) blood_packet.*
+    FROM BloodPacket blood_packet, Donation donation , BloodTransporter blood_transporter 
+    WHERE (
+        blood_packet.donationId = donation.id AND 
+        donation.donorId = blood_transporter.id AND
+        blood_transporter.bloodType = @blood_type AND
+        blood_packet.bloodProduct = @blood_product
+    ) ORDER BY blood_packet.expirationDate ASC
+END
+Go 
+
+exec GetClosestToExpirationBloodPacket @blood_type = N'A+', @blood_product = N'Plasma', @num_of_results = 1;
