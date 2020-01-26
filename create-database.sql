@@ -18,8 +18,8 @@ CREATE TABLE BloodTransporter (
     nationalId NVARCHAR(10) PRIMARY KEY CHECK (nationalId LIKE '%[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]%'),
     firstName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
     lastName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
-    bloodType NVARCHAR(10) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')),
-    email NVARCHAR(100)
+    bloodType NVARCHAR(3) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')),
+    email NVARCHAR(320)
 )
 GO
 
@@ -29,12 +29,14 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Nurse' and xtype='U')
         firstName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
         lastName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
         hiringDate SMALLDATETIME NOT NULL,        
+        FOREIGN KEY (reportsTo) REFERENCES Nurse(employeeId), 
     )
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodBank' and xtype='U')
     CREATE TABLE BloodBank (
         id INTEGER PRIMARY KEY IDENTITY,
+        -- TODO: city
         bankAddress NVARCHAR(300) COLLATE PERSIAN_100_CI_AI NOT NULL,
         bankName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
     )
@@ -58,12 +60,13 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
         pressure INTEGER NOT NULL CHECK (pressure <= 20 AND pressure >= 3),
         temperature INTEGER NOT NULL CHECK (temperature < 50 AND temperature > 30),
         density INTEGER NOT NULL,
-        testTime DATETIME NOT NULL,
+        testDate DATETIME NOT NULL,
         happendAt INTEGER NOT NULL,
         bloodTransporterNationalId NVARCHAR(10) NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
         FOREIGN KEY (bloodTransporterNationalId) REFERENCES BloodTransporter(nationalId),
+        -- TODO:FK to Donation
     )
 GO
 
@@ -84,6 +87,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodProduct' and xtype='U')
     CREATE TABLE BloodProduct (
         productName NVARCHAR(64) NOT NULL,
         volumePerUnit SMALLINT NOT NULL,
+        -- TODO: waitingTime
         PRIMARY KEY (productName),
     )
 
@@ -100,6 +104,12 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName),
     )
 GO
+
+-- TODO:HealthTest Table?
+-- HIV Test
+-- Cholesterol Test
+-- ?
+
 
 -- -- Geolocation data for location
 -- IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hospital' and xtype='U')
