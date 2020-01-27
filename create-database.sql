@@ -9,6 +9,22 @@ END
 GO
 
 CREATE DATABASE [BloodTransfusion]
+	ON
+    PRIMARY
+	(
+		NAME=BloodTransfusion, FILENAME='C:\Dump\BloodTransfusion.mdf',
+		SIZE=100MB,MAXSIZE=UNLIMITED,FILEGROWTH=10%
+	),
+    FILEGROUP FG1
+	(
+		NAME=BloodTransfusionFG1, FILENAME='C:\Dump\BloodTransfusion_fg1.mdf',
+		SIZE=100MB,MAXSIZE=UNLIMITED,FILEGROWTH=10%
+	)
+	LOG ON
+	(
+		NAME=BloodTransfusionLog, FILENAME='C:\Dump\BloodTransfusion_log.LDF',
+		SIZE=1GB,MAXSIZE=5GB,FILEGROWTH=1024MB
+	)
 GO
 
 use BloodTransfusion;
@@ -20,7 +36,7 @@ CREATE TABLE BloodTransporter (
     lastName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
     bloodType NVARCHAR(3) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')),
     email NVARCHAR(320)
-)
+) ON FG1
 GO
 
 CREATE INDEX BloodTransporterBloodTypeIndex ON BloodTransporter (bloodType)
@@ -34,14 +50,14 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Nurse' and xtype='U')
         hiringDate DATE NOT NULL,
         supervisedBy INTEGER,
         FOREIGN KEY (supervisedBy) REFERENCES Nurse(employeeId), 
-    )
+    ) ON FG1
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='City' and xtype='U')
     CREATE TABLE City (
         id INTEGER PRIMARY KEY IDENTITY,
         cityName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL
-    )
+    ) ON FG1
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodBank' and xtype='U')
@@ -51,7 +67,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodBank' and xtype='U')
         bankAddress NVARCHAR(300) COLLATE PERSIAN_100_CI_AI NOT NULL,
         bankName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
         FOREIGN KEY (cityId) REFERENCES City(id)
-    )
+    ) ON FG1
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='WorksAt' and xtype='U')
@@ -63,7 +79,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='WorksAt' and xtype='U')
         PRIMARY KEY (employeeId, bloodBankId),
         FOREIGN KEY (employeeId) REFERENCES Nurse(employeeId),
         FOREIGN KEY (bloodBankId) REFERENCES BloodBank(id),
-    )
+    ) ON FG1
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
@@ -76,7 +92,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
         FOREIGN KEY (donorId) REFERENCES BloodTransporter(nationalId),
-    )
+    ) ON FG1
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
@@ -93,7 +109,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
         FOREIGN KEY (bloodTransporterNationalId) REFERENCES BloodTransporter(nationalId),
         FOREIGN KEY (donationId) REFERENCES Donation(id)
-    )
+    ) ON FG1
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodProduct' and xtype='U')
@@ -102,7 +118,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodProduct' and xtype='U')
         volumePerUnit SMALLINT NOT NULL,
         waitingTime INT NOT NULL,
         PRIMARY KEY (productName),
-    )
+    ) ON FG1
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
     CREATE TABLE BloodPacket (
@@ -118,7 +134,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
         FOREIGN KEY (signedBy) REFERENCES Nurse(employeeId),
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName),
         FOREIGN KEY (locatedAt) REFERENCES BloodBank(id)
-    )
+    ) ON FG1
 GO
 
 -- TODO:HealthTest Table?
@@ -136,7 +152,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hospital' and xtype='U')
         hospitalAddress NVARCHAR(300)
         PRIMARY KEY (id),
         FOREIGN KEY (cityId) REFERENCES City(id)
-    )
+    ) ON FG1
 GO
 
 -- A trigger on Needs to delete and archive the need after amount set to 0
@@ -151,7 +167,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
         PRIMARY KEY (id),
         FOREIGN KEY (neededBy) REFERENCES Hospital(id),
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
-    )
+    ) ON FG1
 GO
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DeliverPacket' and xtype='U')
@@ -161,7 +177,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DeliverPacket' and xtype='U'
         PRIMARY KEY (packetId, destinationHospitalId),
         FOREIGN KEY (packetId) REFERENCES BloodPacket(id),
         FOREIGN KEY (destinationHospitalId) REFERENCES Hospital(id)
-    )
+    ) ON FG1
 GO
 
 -- TEMP inserted datas
