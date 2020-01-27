@@ -163,4 +163,31 @@ BEGIN
 END
 Go 
 
-exec OrderNecessaryBloodProducts @blood_type = N'A+';
+exec OrderNecessaryBloodProducts @blood_type = N'A+'
+GO
+
+
+DROP PROCEDURE IF EXISTS GiveNursesLevels;
+GO
+
+CREATE PROCEDURE GiveNursesLevels
+    @root_nurse_id INTEGER
+AS
+BEGIN
+    WITH CTE_NumOfBloodPacketSignedByInferiors AS
+    (
+        SELECT employeeId, 1 AS nurseLevel FROM Nurse WHERE employeeId = @root_nurse_id
+
+        UNION ALL
+        SELECT
+            nurse.employeeId, CTE_NumOfBloodPacketSignedByInferiors.nurseLevel + 1
+            FROM Nurse Nurse
+            INNER JOIN CTE_NumOfBloodPacketSignedByInferiors
+            ON nurse.supervisedBy = CTE_NumOfBloodPacketSignedByInferiors.employeeId
+    )
+    SELECT * FROM CTE_NumOfBloodPacketSignedByInferiors
+END
+GO
+
+EXEC GiveNursesLevels @root_nurse_id = 1
+GO
