@@ -45,5 +45,5 @@ GO
 UPDATE BloodPacket SET locatedAt = 1 WHERE id = 1
 GO
 
-SELECT * FROM PacketTransfer
+SELECT * FROM PacketTransfer ORDER BY transferDate
 GO

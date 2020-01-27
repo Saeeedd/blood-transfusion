@@ -196,27 +196,27 @@ GO
 
 -- TEMP inserted datas
 INSERT INTO BloodTransporter (nationalId, firstName, lastName, bloodType)
-                VALUES      (N'0021190941', N'saeed', N'saeed', N'A+'),
-                            (N'0021190942', N'علی', N'شسیبسب', N'B+'),
-                            (N'0021190943', N'ahmad', N'ahmad', N'AB+'),
-                            (N'0021190944', N'asghar', N'asghar', N'A-'),
-                            (N'0021190945', N'akbar', N'akbar', N'A+');
+                VALUES      (N'0021190941', N'سعید', N'زنگنه', N'A+'),
+                            (N'0021190942', N'علی', N'توفیقی', N'B+'),
+                            (N'0021190943', N'احمدی', N'احمدی', N'AB+'),
+                            (N'0021190944', N'محمد', N'محمدی', N'A-'),
+                            (N'0021190945', N'کنگر', N'کنگری', N'A+');
 GO
 
 -- TEMP inserted datas
 INSERT INTO City            (cityName)
-                VALUES      (N'city1'),
-                            (N'city2'),
-                            (N'city3'),
-                            (N'city4'),
-                            (N'city5')
+                VALUES      (N'شهر۱'),
+                            (N'شهر۲'),
+                            (N'شهر۳'),
+                            (N'شهر۴'),
+                            (N'شهر۵')
 GO
 
 -- TEMP inserted datas
 INSERT INTO BloodBank (bankAddress, bankName, cityId)
-                VALUES      (N'bank1', N'bank1', 1),
-                            (N'bank2', N'bank1', 1),
-                            (N'bank3', N'bank1', 2);
+                VALUES      (N'آدرس بانک ۱', N'بانک۱', 1),
+                            (N'آدرس بانک ۲', N'بانک۲', 1),
+                            (N'آدرس بانک ۳', N'بانک۳', 2);
 GO
 
 -- TEMP inserted datas
@@ -230,40 +230,40 @@ GO
 
 -- TEMP inserted datas
 INSERT INTO Nurse (firstName, lastName, hiringDate, supervisedBy)
-                VALUES      (N'nurse1', N'nurse1', '2015-01-01', NULL),
-                            (N'nurse2', N'nurse2', '2015-02-02', 1),
-                            (N'nurse3', N'nurse3', '2015-01-03', 1),
-                            (N'nurse4', N'nurse4', '2015-01-04', 2),
-                            (N'nurse5', N'nurse5', '2015-01-05', 4);
+                VALUES      (N'پرستار۱', N'پرستار۱', '2015-01-01', NULL),
+                            (N'پرستار۲', N'پرستار۲', '2015-02-02', 1),
+                            (N'پرستار۳', N'پرستار۳', '2015-01-03', 1),
+                            (N'پرستار۴', N'پرستار۴', '2015-01-04', 2),
+                            (N'پرستار۵', N'پرستار۵', '2015-01-05', 4);
 GO
 
 -- TEMP inserted datas
 INSERT INTO Hospital (hospitalName, hospitalAddress, cityId)
-                VALUES      (N'Hospital1', N'address1', 1),
-                            (N'Hospital2', N'address2', 1),
-                            (N'Hospital3', N'address3', 1);
+                VALUES      (N'بیمارستان۱', N'address1', 1),
+                            (N'بیمارستان۲', N'address2', 1),
+                            (N'بیمارستان۳', N'address3', 1);
 GO
 
 -- TEMP inserted datas
 INSERT INTO BloodProduct (productName, volumePerUnit, waitingTime)
-                VALUES      (N'Plasma', 200, 50),
-                            (N'Blood', 450, 150),
-                            (N'Pelacket', 50, 100),
-                            (N'Globulin', 100, 200);
+                VALUES      (N'پلاسما', 200, 50),
+                            (N'خون', 450, 150),
+                            (N'پلاکت', 50, 100),
+                            (N'گلبول', 100, 200);
 GO
 
 -- TEMP inserted datas
 INSERT INTO Need (neededBy, units, bloodProduct, needPriority, bloodType)
-                VALUES      (1, 1, N'Plasma', 1, N'A+');
+                VALUES      (1, 1, N'پلاسما', 1, N'A+');
 GO
 
 -- TEMP inserted datas
 INSERT INTO BloodPacket (donationId, bloodProduct, expirationDate, signedBy, locatedAt)
-                VALUES      (1, N'Plasma', '2015-01-01', 1, 1),
-                            (1, N'Blood', '2015-02-02', 2, 1),
-                            (1, N'Blood', '2015-01-03', 3, 1),
-                            (1, N'Blood', '2015-01-04', 4, 1),
-                            (1, N'Blood', '2015-01-04', 4, 1),
-                            (1, N'Pelacket', '2015-01-04', 4, 1),
-                            (2, N'Plasma', '2015-01-05', 5, 1);
+                VALUES      (1, N'پلاسما', '2015-01-01', 1, 1),
+                            (1, N'خون', '2015-02-02', 2, 1),
+                            (1, N'خون', '2015-01-03', 3, 1),
+                            (1, N'خون', '2015-01-04', 4, 1),
+                            (1, N'خون', '2015-01-04', 4, 1),
+                            (1, N'پلاکت', '2015-01-04', 4, 1),
+                            (2, N'پلاسما', '2015-01-05', 5, 1);
 GO

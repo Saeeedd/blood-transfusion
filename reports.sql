@@ -40,7 +40,7 @@ END
 Go 
 
 declare @date DATE;
-exec GetTimeOfNextDonation @blood_transporter_id = N'0021190941', @blood_product_name = N'Plasma', @date_value = @date OUTPUT;
+exec GetTimeOfNextDonation @blood_transporter_id = N'0021190941', @blood_product_name = N'پلاسما', @date_value = @date OUTPUT;
 SELECT @date as nextDonationTime
 GO
 
@@ -75,7 +75,7 @@ RETURN
 )
 Go 
 
-SELECT * FROM GetClosestToExpirationBloodPacket(N'A+', N'Plasma', 1);
+SELECT * FROM GetClosestToExpirationBloodPacket(N'A+', N'پلاسما', 1);
 GO
 
 DROP PROCEDURE IF EXISTS OrderNecessaryBloodProductsInCity;
@@ -163,4 +163,3 @@ END
 Go 
 
 exec OrderNecessaryBloodProducts @blood_type = N'A+';
-
