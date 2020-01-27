@@ -51,13 +51,17 @@ GO
 CREATE FUNCTION GetBloodPacketsAccordingTypeAndProductAndCity (
     @blood_type NVARCHAR(64),
     @blood_product NVARCHAR(64),
-    @city_id_of_requester INTEGER
+    @city_name_of_requester NVARCHAR(64)
 ) RETURNS TABLE
 AS 
 RETURN 
 (
     SELECT blood_packet.*
-    FROM BloodPacket blood_packet, Donation donation, BloodTransporter blood_transporter, BloodBank blood_bank
+    FROM    BloodPacket blood_packet, 
+            Donation donation, 
+            BloodTransporter blood_transporter, 
+            BloodBank blood_bank, 
+            City city
     WHERE 
     (
         blood_packet.donationId = donation.id AND 
@@ -65,7 +69,8 @@ RETURN
         blood_transporter.bloodType = @blood_type AND
         blood_packet.bloodProduct = @blood_product AND
         blood_packet.locatedAt = blood_bank.cityId AND
-        blood_bank.cityId = @city_id_of_requester
+        blood_bank.cityId = city.id AND
+        city.cityName = @city_name_of_requester
     )
 )
 Go 
@@ -78,8 +83,8 @@ GO
 
 -- Get most necessary blood type according to city
 CREATE PROCEDURE OrderNecessaryBloodProductsInCity
-    @city_id INTEGER,
-    @blood_type NVARCHAR(3)
+    @blood_type NVARCHAR(3),
+    @city_name_of_requester NVARCHAR(64)
 AS 
 BEGIN
     SET NOCOUNT ON;
@@ -100,7 +105,8 @@ BEGIN
             SELECT COUNT(*) FROM    PresentBloodPacket blood_packet, 
                                     Donation donation, 
                                     BloodTransporter blood_transporter, 
-                                    BloodBank blood_bank
+                                    BloodBank blood_bank,
+                                    City city
             WHERE 
             (
                 blood_packet.donationId = donation.id AND
@@ -108,7 +114,8 @@ BEGIN
                 donation.donorId = blood_transporter.nationalId AND
                 blood_transporter.bloodType = @blood_type AND
                 blood_packet.locatedAt = blood_bank.id AND
-                blood_bank.cityId = @city_id
+                blood_bank.cityId = city.id AND
+                city.cityName = @city_name_of_requester
             )
         )
     ) AS bloodProductNeed FROM BloodProduct blood_product ORDER BY bloodProductNeed DESC
