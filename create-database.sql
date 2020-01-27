@@ -27,6 +27,9 @@ CREATE DATABASE [BloodTransfusion]
 	)
 GO
 
+ALTER DATABASE BloodTransfusion MODIFY FILEGROUP FG1 DEFAULT
+GO
+
 use BloodTransfusion;
 
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodTransporter' and xtype='U')
@@ -66,7 +69,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodBank' and xtype='U')
         cityId INTEGER NOT NULL,
         bankAddress NVARCHAR(300) COLLATE PERSIAN_100_CI_AI NOT NULL,
         bankName NVARCHAR(64) COLLATE PERSIAN_100_CI_AI NOT NULL,
-        FOREIGN KEY (cityId) REFERENCES City(id)
+        FOREIGN KEY (cityId) REFERENCES City(id) ON DELETE CASCADE
     ) ON FG1
 GO
 
@@ -77,8 +80,8 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='WorksAt' and xtype='U')
         startTime DATE NOT NULL,
         endTime DATE, 
         PRIMARY KEY (employeeId, bloodBankId),
-        FOREIGN KEY (employeeId) REFERENCES Nurse(employeeId),
-        FOREIGN KEY (bloodBankId) REFERENCES BloodBank(id),
+        FOREIGN KEY (employeeId) REFERENCES Nurse(employeeId) ON DELETE CASCADE,
+        FOREIGN KEY (bloodBankId) REFERENCES BloodBank(id) ON DELETE CASCADE,
     ) ON FG1
 GO
 
@@ -91,7 +94,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
         donationTime DATE NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
-        FOREIGN KEY (donorId) REFERENCES BloodTransporter(nationalId),
+        FOREIGN KEY (donorId) REFERENCES BloodTransporter(nationalId) ON DELETE CASCADE,
     ) ON FG1
 GO
 
@@ -107,7 +110,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
         donationId INTEGER NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
-        FOREIGN KEY (bloodTransporterNationalId) REFERENCES BloodTransporter(nationalId),
+        FOREIGN KEY (bloodTransporterNationalId) REFERENCES BloodTransporter(nationalId) ON DELETE CASCADE,
         FOREIGN KEY (donationId) REFERENCES Donation(id)
     ) ON FG1
 GO
@@ -130,10 +133,10 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
         locatedAt INTEGER NOT NULL,
         isDelivered BIT DEFAULT 0 NOT NULL,
         PRIMARY KEY (id),
-        FOREIGN KEY (donationId) REFERENCES Donation(id),
+        FOREIGN KEY (donationId) REFERENCES Donation(id) ON DELETE CASCADE,
         FOREIGN KEY (signedBy) REFERENCES Nurse(employeeId),
-        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName),
-        FOREIGN KEY (locatedAt) REFERENCES BloodBank(id)
+        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName) ON DELETE CASCADE,
+        FOREIGN KEY (locatedAt) REFERENCES BloodBank(id) ON DELETE CASCADE
     ) ON FG1
 GO
 
@@ -151,7 +154,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hospital' and xtype='U')
         cityId INTEGER NOT NULL,
         hospitalAddress NVARCHAR(300)
         PRIMARY KEY (id),
-        FOREIGN KEY (cityId) REFERENCES City(id)
+        FOREIGN KEY (cityId) REFERENCES City(id) ON DELETE CASCADE
     ) ON FG1
 GO
 
@@ -165,8 +168,8 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
         needPriority INTEGER NOT NULL DEFAULT 1 CHECK (needPriority >= 1 AND needPriority <= 3),
         bloodType NVARCHAR(3) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')), 
         PRIMARY KEY (id),
-        FOREIGN KEY (neededBy) REFERENCES Hospital(id),
-        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
+        FOREIGN KEY (neededBy) REFERENCES Hospital(id) ON DELETE CASCADE,
+        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName) ON DELETE CASCADE, 
     ) ON FG1
 GO
 
@@ -175,7 +178,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DeliverPacket' and xtype='U'
         packetId INTEGER NOT NULL,
         destinationHospitalId INTEGER NOT NULL,
         PRIMARY KEY (packetId, destinationHospitalId),
-        FOREIGN KEY (packetId) REFERENCES BloodPacket(id),
+        FOREIGN KEY (packetId) REFERENCES BloodPacket(id) ON DELETE CASCADE,
         FOREIGN KEY (destinationHospitalId) REFERENCES Hospital(id)
     ) ON FG1
 GO
