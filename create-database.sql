@@ -109,12 +109,21 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
         expirationDate DATE NOT NULL,
         signedBy INTEGER NOT NULL,
         locatedAt INTEGER NOT NULL,
+        isDelivered BIT DEFAULT 0 NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (donationId) REFERENCES Donation(id),
         FOREIGN KEY (signedBy) REFERENCES Nurse(employeeId),
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName),
         FOREIGN KEY (locatedAt) REFERENCES BloodBank(id)
     )
+GO
+
+DROP VIEW IF EXISTS PresentBloodPacket
+GO
+
+CREATE VIEW PresentBloodPacket AS (
+    SELECT * FROM BloodPacket WHERE isDelivered = 0
+)
 GO
 
 -- TODO:HealthTest Table?
@@ -138,21 +147,32 @@ GO
 -- A trigger on Needs to delete and archive the need after amount set to 0
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
     CREATE TABLE Need (
+        id INTEGER IDENTITY NOT NULL,
         neededBy INTEGER NOT NULL,
         units INTEGER NOT NULL,
         bloodProduct NVARCHAR(64) NOT NULL,
         needPriority INTEGER NOT NULL DEFAULT 1 CHECK (needPriority >= 1 AND needPriority <= 3),
         bloodType NVARCHAR(3) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')), 
-        PRIMARY KEY (neededBy, bloodProduct),
+        PRIMARY KEY (id),
         FOREIGN KEY (neededBy) REFERENCES Hospital(id),
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName), 
+    )
+GO
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DeliverPacket' and xtype='U')
+    CREATE TABLE DeliveredPackets (
+        packetId INTEGER NOT NULL,
+        destinationHospitalId INTEGER NOT NULL,
+        PRIMARY KEY (packetId, destinationHospitalId),
+        FOREIGN KEY (packetId) REFERENCES BloodPacket(id),
+        FOREIGN KEY (destinationHospitalId) REFERENCES Hospital(id)
     )
 GO
 
 -- TEMP inserted datas
 INSERT INTO BloodTransporter (nationalId, firstName, lastName, bloodType)
                 VALUES      (N'0021190941', N'saeed', N'saeed', N'A+'),
-                            (N'0021190942', N'ali', N'ali', N'B+'),
+                            (N'0021190942', N'علی', N'شسیبسب', N'B+'),
                             (N'0021190943', N'ahmad', N'ahmad', N'AB+'),
                             (N'0021190944', N'asghar', N'asghar', N'A-'),
                             (N'0021190945', N'akbar', N'akbar', N'A+');
@@ -169,7 +189,9 @@ GO
 
 -- TEMP inserted datas
 INSERT INTO BloodBank (bankAddress, bankName, cityId)
-                VALUES      (N'bank1', N'bank1', 1);
+                VALUES      (N'bank1', N'bank1', 1),
+                            (N'bank2', N'bank1', 1),
+                            (N'bank3', N'bank1', 2);
 GO
 
 -- TEMP inserted datas
@@ -182,12 +204,12 @@ INSERT INTO Donation (donorId, happendAt, amount, donationTime)
 GO
 
 -- TEMP inserted datas
-INSERT INTO Nurse (firstName, lastName, hiringDate)
-                VALUES      (N'nurse1', N'nurse1', '2015-01-01'),
-                            (N'nurse2', N'nurse2', '2015-02-02'),
-                            (N'nurse3', N'nurse3', '2015-01-03'),
-                            (N'nurse4', N'nurse4', '2015-01-04'),
-                            (N'nurse5', N'nurse5', '2015-01-05');
+INSERT INTO Nurse (firstName, lastName, hiringDate, supervisedBy)
+                VALUES      (N'nurse1', N'nurse1', '2015-01-01', NULL),
+                            (N'nurse2', N'nurse2', '2015-02-02', 1),
+                            (N'nurse3', N'nurse3', '2015-01-03', 1),
+                            (N'nurse4', N'nurse4', '2015-01-04', 2),
+                            (N'nurse5', N'nurse5', '2015-01-05', 4);
 GO
 
 -- TEMP inserted datas

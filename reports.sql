@@ -17,7 +17,6 @@ BEGIN
 END
 Go
 
-
 EXEC GetListOfDonors;
 GO
 
@@ -52,12 +51,11 @@ GO
 CREATE PROCEDURE GetClosestToExpirationBloodPacket
     @blood_type NVARCHAR(64),
     @blood_product NVARCHAR(64),
-    @num_of_results INTEGER,
     @city_id_of_requester INTEGER
 AS 
 BEGIN
     SET NOCOUNT ON;
-    SELECT TOP (@num_of_results) blood_packet.*
+    SELECT blood_packet.*
     FROM BloodPacket blood_packet, Donation donation, BloodTransporter blood_transporter, BloodBank blood_bank
     WHERE (
         blood_packet.donationId = donation.id AND 
@@ -70,14 +68,14 @@ BEGIN
 END
 Go 
 
-exec GetClosestToExpirationBloodPacket @blood_type = N'A+', @blood_product = N'Plasma', @num_of_results = 1, @city_id_of_requester = 1;
+exec GetClosestToExpirationBloodPacket @blood_type = N'A+', @blood_product = N'Plasma', @city_id_of_requester = 1;
 GO
 
-DROP PROCEDURE IF EXISTS OrderNecessaryBloodProducts;
+DROP PROCEDURE IF EXISTS OrderNecessaryBloodProductsInCity;
 GO
 
--- Get most necessary blood type to expiration blood packet for next donation
-CREATE PROCEDURE OrderNecessaryBloodProducts
+-- Get most necessary blood type according to city
+CREATE PROCEDURE OrderNecessaryBloodProductsInCity
     @city_id INTEGER,
     @blood_type NVARCHAR(3)
 AS 
@@ -86,9 +84,10 @@ BEGIN
 
     SELECT blood_product.*, (
         (
-            SELECT COALESCE(SUM(need.needPriority), 0) FROM Need need, Hospital Hospital
+            SELECT COALESCE(SUM(need.needPriority), 0) FROM Need need, Hospital hospital
             WHERE
             (
+                need.neededBy = hospital.id AND
                 hospital.cityId = @city_id AND
                 need.bloodProduct = blood_product.productName AND
                 need.bloodType = @blood_type
@@ -96,7 +95,10 @@ BEGIN
         )
         - 
         (
-            SELECT COUNT(*) FROM BloodPacket blood_packet, Donation donation, BloodTransporter blood_transporter, BloodBank blood_bank
+            SELECT COUNT(*) FROM    PresentBloodPacket blood_packet, 
+                                    Donation donation, 
+                                    BloodTransporter blood_transporter, 
+                                    BloodBank blood_bank
             WHERE 
             (
                 blood_packet.donationId = donation.id AND
@@ -112,4 +114,44 @@ BEGIN
 END
 Go 
 
-exec OrderNecessaryBloodProducts @city_id = 1, @blood_type = N'A+';
+exec OrderNecessaryBloodProductsInCity @city_id = 1, @blood_type = N'A+';
+
+DROP PROCEDURE IF EXISTS OrderNecessaryBloodProducts;
+GO
+
+-- Get most necessary blood types in all cities
+CREATE PROCEDURE OrderNecessaryBloodProducts
+    @blood_type NVARCHAR(3)
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT blood_product.*, (
+        (
+            SELECT COALESCE(SUM(need.needPriority), 0) FROM Need need
+            WHERE
+            (
+                need.bloodProduct = blood_product.productName AND
+                need.bloodType = @blood_type
+            )
+        )
+        - 
+        (
+            SELECT COUNT(*) FROM    PresentBloodPacket blood_packet, 
+                                    Donation donation, 
+                                    BloodTransporter blood_transporter
+            WHERE 
+            (
+                blood_packet.donationId = donation.id AND
+                blood_packet.bloodProduct = blood_product.productName AND
+                donation.donorId = blood_transporter.nationalId AND
+                blood_transporter.bloodType = @blood_type 
+            )
+        )
+    ) AS bloodProductNeed FROM BloodProduct blood_product ORDER BY bloodProductNeed DESC
+
+END
+Go 
+
+exec OrderNecessaryBloodProducts @blood_type = N'A+';
+
