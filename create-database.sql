@@ -183,6 +183,17 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DeliverPacket' and xtype='U'
     ) ON FG1
 GO
 
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='PacketTransfer' and xtype='U')
+    CREATE TABLE PacketTransfer (
+        packetId INTEGER NOT NULL,
+        destinationBloodBankId INTEGER NOT NULL,
+        transferDate DATETIME NOT NULL,
+        PRIMARY KEY (packetId, destinationBloodBankId, transferDate),
+        FOREIGN KEY (packetId) REFERENCES BloodPacket(id) ON DELETE CASCADE,
+        FOREIGN KEY (destinationBloodBankId) REFERENCES BloodBank(id) ON DELETE NO ACTION
+    ) ON FG1
+GO
+
 -- TEMP inserted datas
 INSERT INTO BloodTransporter (nationalId, firstName, lastName, bloodType)
                 VALUES      (N'0021190941', N'saeed', N'saeed', N'A+'),
