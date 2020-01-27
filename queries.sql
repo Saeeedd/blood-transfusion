@@ -111,23 +111,32 @@ GO
 
 
 -- ----------------------------------------------------------------------------
--- DROP PROCEDURE IF EXISTS SatisfyNeed;
+DROP PROCEDURE IF EXISTS SatisfyNeed;
+GO
+
+CREATE PROCEDURE SatisfyNeed
+    @need_id INTEGER
+AS 
+BEGIN
+    SET NOCOUNT ON;
+    IF ((SELECT COUNT(*) FROM GetBloodPacketsAccordingTypeAndProductAndCity (
+        (SELECT bloodType FROM Need need WHERE need.id = @need_id),
+        (SELECT bloodProduct FROM Need need WHERE need.id = @need_id),
+        (SELECT hospital.cityId FROM Need need, Hospital hospital WHERE (
+            need.id = @need_id AND
+            need.neededBy = hospital.id
+        )))) > (SELECT need.units FROM Need need WHERE need.id = @need_id))
+    BEGIN
+        PRINT '10'
+    END
+END
+GO
+
+EXEC SatisfyNeed @need_id = 1
+GO
+
+-- UPDATE BloodPacket SET isDelivered = 0 WHERE id = 1
 -- GO
 
--- CREATE PROCEDURE SatisfyNeed
---     @needId INTEGER
--- AS 
--- BEGIN
---     SET NOCOUNT ON;
---     EXEC GetClosestToExpirationBloodPacket @blood_typ;
--- END
+-- DELETE DeliveredPackets WHERE packetId = 1
 -- GO
-
--- EXEC SatisfyNeed @needId = 1
--- GO
-
--- -- UPDATE BloodPacket SET isDelivered = 0 WHERE id = 1
--- -- GO
-
--- -- DELETE DeliveredPackets WHERE packetId = 1
--- -- GO

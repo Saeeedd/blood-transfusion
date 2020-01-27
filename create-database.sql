@@ -23,6 +23,9 @@ CREATE TABLE BloodTransporter (
 )
 GO
 
+CREATE INDEX BloodTransporterBloodTypeIndex ON BloodTransporter (bloodType)
+GO
+
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Nurse' and xtype='U')
     CREATE TABLE Nurse (
         employeeId INTEGER PRIMARY KEY IDENTITY,
@@ -118,14 +121,6 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
     )
 GO
 
-DROP VIEW IF EXISTS PresentBloodPacket
-GO
-
-CREATE VIEW PresentBloodPacket AS (
-    SELECT * FROM BloodPacket WHERE isDelivered = 0
-)
-GO
-
 -- TODO:HealthTest Table?
 -- HIV Test
 -- Cholesterol Test
@@ -150,7 +145,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
         id INTEGER IDENTITY NOT NULL,
         neededBy INTEGER NOT NULL,
         units INTEGER NOT NULL,
-        bloodProduct NVARCHAR(64) NOT NULL,
+        bloodProduct NVARCHAR(64) NOT NULL, -- satisfied
         needPriority INTEGER NOT NULL DEFAULT 1 CHECK (needPriority >= 1 AND needPriority <= 3),
         bloodType NVARCHAR(3) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')), 
         PRIMARY KEY (id),
@@ -225,6 +220,11 @@ INSERT INTO BloodProduct (productName, volumePerUnit, waitingTime)
                             (N'Blood', 450, 150),
                             (N'Pelacket', 50, 100),
                             (N'Globulin', 100, 200);
+GO
+
+-- TEMP inserted datas
+INSERT INTO Need (neededBy, units, bloodProduct, needPriority, bloodType)
+                VALUES      (1, 1, N'Plasma', 1, N'A+');
 GO
 
 -- TEMP inserted datas

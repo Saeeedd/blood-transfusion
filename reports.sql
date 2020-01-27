@@ -44,31 +44,33 @@ exec GetTimeOfNextDonation @blood_transporter_id = N'0021190941', @blood_product
 SELECT @date as nextDonationTime
 GO
 
-DROP PROCEDURE IF EXISTS GetClosestToExpirationBloodPacket
+DROP FUNCTION IF EXISTS GetClosestToExpirationBloodPacket
 GO
 
 -- Get closest to expiration blood packet for next donation
-CREATE PROCEDURE GetClosestToExpirationBloodPacket
+CREATE FUNCTION GetBloodPacketsAccordingTypeAndProductAndCity (
     @blood_type NVARCHAR(64),
     @blood_product NVARCHAR(64),
     @city_id_of_requester INTEGER
+) RETURNS TABLE
 AS 
-BEGIN
-    SET NOCOUNT ON;
+RETURN 
+(
     SELECT blood_packet.*
     FROM BloodPacket blood_packet, Donation donation, BloodTransporter blood_transporter, BloodBank blood_bank
-    WHERE (
+    WHERE 
+    (
         blood_packet.donationId = donation.id AND 
         donation.donorId = blood_transporter.nationalId AND
         blood_transporter.bloodType = @blood_type AND
         blood_packet.bloodProduct = @blood_product AND
         blood_packet.locatedAt = blood_bank.cityId AND
         blood_bank.cityId = @city_id_of_requester
-    ) ORDER BY blood_packet.expirationDate ASC
-END
+    )
+)
 Go 
 
-exec GetClosestToExpirationBloodPacket @blood_type = N'A+', @blood_product = N'Plasma', @city_id_of_requester = 1;
+SELECT * FROM GetClosestToExpirationBloodPacket(N'A+', N'Plasma', 1);
 GO
 
 DROP PROCEDURE IF EXISTS OrderNecessaryBloodProductsInCity;
