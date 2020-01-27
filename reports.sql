@@ -44,7 +44,7 @@ exec GetTimeOfNextDonation @blood_transporter_id = N'0021190941', @blood_product
 SELECT @date as nextDonationTime
 GO
 
-DROP FUNCTION IF EXISTS GetClosestToExpirationBloodPacket
+DROP FUNCTION IF EXISTS GetBloodPacketsAccordingTypeAndProductAndCity
 GO
 
 -- Get closest to expiration blood packet for next donation
@@ -75,7 +75,7 @@ RETURN
 )
 Go 
 
-SELECT * FROM GetClosestToExpirationBloodPacket(N'A+', N'پلاسما', 1);
+SELECT * FROM GetBloodPacketsAccordingTypeAndProductAndCity(N'A+', N'پلاسما', N'شهر۱');
 GO
 
 DROP PROCEDURE IF EXISTS OrderNecessaryBloodProductsInCity;
@@ -91,11 +91,12 @@ BEGIN
 
     SELECT blood_product.*, (
         (
-            SELECT COALESCE(SUM(need.needPriority), 0) FROM Need need, Hospital hospital
+            SELECT COALESCE(SUM(need.needPriority), 0) FROM Need need, Hospital hospital, City city
             WHERE
             (
                 need.neededBy = hospital.id AND
-                hospital.cityId = @city_id AND
+                hospital.cityId = city.id AND
+                city.cityName = @city_name_of_requester AND
                 need.bloodProduct = blood_product.productName AND
                 need.bloodType = @blood_type
             )
@@ -123,7 +124,7 @@ BEGIN
 END
 Go 
 
-exec OrderNecessaryBloodProductsInCity @city_id = 1, @blood_type = N'A+';
+exec OrderNecessaryBloodProductsInCity @city_name_of_requester = N'شهر۱', @blood_type = N'A+';
 
 DROP PROCEDURE IF EXISTS OrderNecessaryBloodProducts;
 GO
