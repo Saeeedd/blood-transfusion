@@ -116,11 +116,9 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
         temperature INTEGER NOT NULL CHECK (temperature < 50 AND temperature > 30),
         density INTEGER NOT NULL,
         testDate DATE NOT NULL,
-        happendAt INTEGER NOT NULL,
         bloodTransporterNationalId NVARCHAR(10) NOT NULL,
         donationId INTEGER NOT NULL,
         PRIMARY KEY (id),
-        FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
         FOREIGN KEY (bloodTransporterNationalId) REFERENCES BloodTransporter(nationalId) ON DELETE CASCADE,
         FOREIGN KEY (donationId) REFERENCES Donation(id)
     ) ON FG1
@@ -140,12 +138,6 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
         FOREIGN KEY (locatedAt) REFERENCES BloodBank(id) ON DELETE CASCADE
     ) ON FG1
 GO
-
--- TODO:HealthTest Table?
--- HIV Test
--- Cholesterol Test
--- ?
-
 
 -- Geolocation data for location
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Hospital' and xtype='U')
