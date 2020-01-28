@@ -67,7 +67,7 @@ RETURN
         blood_packet.donationId = donation.id AND 
         donation.donorId = blood_transporter.nationalId AND
         blood_transporter.bloodType = @blood_type AND
-        blood_packet.bloodProduct = @blood_product AND
+        donation.bloodProduct = @blood_product AND
         blood_packet.locatedAt = blood_bank.cityId AND
         blood_bank.cityId = city.id AND
         city.cityName = @city_name_of_requester
@@ -91,7 +91,10 @@ BEGIN
 
     SELECT blood_product.*, (
         (
-            SELECT COALESCE(SUM(need.needPriority), 0) FROM Need need, Hospital hospital, City city
+            SELECT COALESCE(SUM(need.needPriority), 0) 
+            FROM    Need need, 
+                    Hospital hospital, 
+                    City city
             WHERE
             (
                 need.neededBy = hospital.id AND
@@ -111,7 +114,7 @@ BEGIN
             WHERE 
             (
                 blood_packet.donationId = donation.id AND
-                blood_packet.bloodProduct = blood_product.productName AND
+                donation.bloodProduct = blood_product.productName AND
                 donation.donorId = blood_transporter.nationalId AND
                 blood_transporter.bloodType = @blood_type AND
                 blood_packet.locatedAt = blood_bank.id AND
@@ -153,7 +156,7 @@ BEGIN
             WHERE 
             (
                 blood_packet.donationId = donation.id AND
-                blood_packet.bloodProduct = blood_product.productName AND
+                donation.bloodProduct = blood_product.productName AND
                 donation.donorId = blood_transporter.nationalId AND
                 blood_transporter.bloodType = @blood_type 
             )

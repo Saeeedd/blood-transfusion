@@ -85,6 +85,15 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='WorksAt' and xtype='U')
     ) ON FG1
 GO
 
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodProduct' and xtype='U')
+    CREATE TABLE BloodProduct (
+        productName NVARCHAR(64) NOT NULL,
+        volumePerUnit SMALLINT NOT NULL,
+        waitingTime INT NOT NULL,
+        PRIMARY KEY (productName),
+    ) ON FG1
+
+
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
     CREATE TABLE Donation (
         id INTEGER NOT NULL IDENTITY,
@@ -92,9 +101,11 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Donation' and xtype='U')
         happendAt INTEGER NOT NULL,
         amount INTEGER NOT NULL,
         donationTime DATE NOT NULL,
+        bloodProduct NVARCHAR(64) NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (happendAt) REFERENCES BloodBank(id),
         FOREIGN KEY (donorId) REFERENCES BloodTransporter(nationalId) ON DELETE CASCADE,
+        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName) ON DELETE CASCADE
     ) ON FG1
 GO
 
@@ -115,19 +126,10 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='HealthReport' and xtype='U')
     ) ON FG1
 GO
 
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodProduct' and xtype='U')
-    CREATE TABLE BloodProduct (
-        productName NVARCHAR(64) NOT NULL,
-        volumePerUnit SMALLINT NOT NULL,
-        waitingTime INT NOT NULL,
-        PRIMARY KEY (productName),
-    ) ON FG1
-
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
     CREATE TABLE BloodPacket (
         id INTEGER NOT NULL IDENTITY,
         donationId INTEGER NOT NULL,
-        bloodProduct NVARCHAR(64) NOT NULL,
         expirationDate DATE NOT NULL,
         signedBy INTEGER NOT NULL,
         locatedAt INTEGER NOT NULL,
@@ -135,7 +137,6 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BloodPacket' and xtype='U')
         PRIMARY KEY (id),
         FOREIGN KEY (donationId) REFERENCES Donation(id) ON DELETE CASCADE,
         FOREIGN KEY (signedBy) REFERENCES Nurse(employeeId),
-        FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName) ON DELETE CASCADE,
         FOREIGN KEY (locatedAt) REFERENCES BloodBank(id) ON DELETE CASCADE
     ) ON FG1
 GO
@@ -222,12 +223,20 @@ INSERT INTO BloodBank (bankAddress, bankName, cityId)
 GO
 
 -- TEMP inserted datas
-INSERT INTO Donation (donorId, happendAt, amount, donationTime)
-                VALUES      (N'0021190941', 1, 100, '2015-01-01'),
-                            (N'0021190941', 1, 100, '2015-02-02'),
-                            (N'0021190943', 1, 100, '2015-01-03'),
-                            (N'0021190943', 1, 100, '2015-01-04'),
-                            (N'0021190943', 1, 100, '2015-01-05');
+INSERT INTO BloodProduct (productName, volumePerUnit, waitingTime)
+                VALUES      (N'پلاسما', 200, 50),
+                            (N'خون', 450, 150),
+                            (N'پلاکت', 50, 100),
+                            (N'گلبول', 100, 200);
+GO
+
+-- TEMP inserted datas
+INSERT INTO Donation (donorId, happendAt, amount, donationTime, bloodProduct)
+                VALUES      (N'0021190941', 1, 100, '2015-01-01', N'پلاسما'),
+                            (N'0021190941', 1, 100, '2015-02-02', N'پلاسما'),
+                            (N'0021190943', 1, 100, '2015-01-03', N'پلاسما'),
+                            (N'0021190943', 1, 100, '2015-01-04', N'پلاسما'),
+                            (N'0021190943', 1, 100, '2015-01-05', N'پلاسما');
 GO
 
 -- TEMP inserted datas
@@ -247,25 +256,17 @@ INSERT INTO Hospital (hospitalName, hospitalAddress, cityId)
 GO
 
 -- TEMP inserted datas
-INSERT INTO BloodProduct (productName, volumePerUnit, waitingTime)
-                VALUES      (N'پلاسما', 200, 50),
-                            (N'خون', 450, 150),
-                            (N'پلاکت', 50, 100),
-                            (N'گلبول', 100, 200);
-GO
-
--- TEMP inserted datas
 INSERT INTO Need (neededBy, units, bloodProduct, needPriority, bloodType)
                 VALUES      (1, 1, N'پلاسما', 1, N'A+');
 GO
 
 -- TEMP inserted datas
-INSERT INTO BloodPacket (donationId, bloodProduct, expirationDate, signedBy, locatedAt)
-                VALUES      (1, N'پلاسما', '2015-01-01', 1, 1),
-                            (1, N'خون', '2015-02-02', 2, 1),
-                            (1, N'خون', '2015-01-03', 3, 1),
-                            (1, N'خون', '2015-01-04', 4, 1),
-                            (1, N'خون', '2015-01-04', 4, 1),
-                            (1, N'پلاکت', '2015-01-04', 4, 1),
-                            (2, N'پلاسما', '2015-01-05', 5, 1);
+INSERT INTO BloodPacket (donationId, expirationDate, signedBy, locatedAt)
+                VALUES      (1, '2015-01-01', 1, 1),
+                            (1, '2015-02-02', 2, 1),
+                            (1, '2015-01-03', 3, 1),
+                            (1, '2015-01-04', 4, 1),
+                            (1, '2015-01-04', 4, 1),
+                            (1, '2015-01-04', 4, 1),
+                            (2, '2015-01-05', 5, 1);
 GO
