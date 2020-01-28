@@ -167,6 +167,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Need' and xtype='U')
         bloodProduct NVARCHAR(64) NOT NULL, -- satisfied
         needPriority INTEGER NOT NULL DEFAULT 1 CHECK (needPriority >= 1 AND needPriority <= 3),
         bloodType NVARCHAR(3) NOT NULL CHECK (bloodType IN(N'O-', N'O+', N'A+', N'A-', N'B+', N'B-', N'AB+', N'AB-')), 
+        raisedAt DATETIME NOT NULL DEFAULT SYSDATETIME(),
         PRIMARY KEY (id),
         FOREIGN KEY (neededBy) REFERENCES Hospital(id) ON DELETE CASCADE,
         FOREIGN KEY (bloodProduct) REFERENCES BloodProduct(productName) ON DELETE CASCADE, 
@@ -177,6 +178,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DeliverPacket' and xtype='U'
     CREATE TABLE DeliveredPackets (
         packetId INTEGER NOT NULL,
         destinationHospitalId INTEGER NOT NULL,
+        deliveredAt DATETIME NOT NULL,
         PRIMARY KEY (packetId, destinationHospitalId),
         FOREIGN KEY (packetId) REFERENCES BloodPacket(id) ON DELETE CASCADE,
         FOREIGN KEY (destinationHospitalId) REFERENCES Hospital(id)
